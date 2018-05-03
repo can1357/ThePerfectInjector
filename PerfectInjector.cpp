@@ -92,14 +92,14 @@ PUCHAR FindKernelPadSinglePage( PUCHAR Start, SIZE_T Size )
 	return 0;
 }
 
-uint32_t FindProcess( std::string Name )
+uint32_t FindProcess( const std::string& Name )
 {
 	PROCESSENTRY32 ProcessEntry;
 	ProcessEntry.dwSize = sizeof( PROCESSENTRY32 );
 	HANDLE ProcessSnapshot = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, NULL );
-	if ( Process32First( ProcessSnapshot, &ProcessEntry ) == TRUE )
+	if ( Process32First( ProcessSnapshot, &ProcessEntry ) )
 	{
-		while ( Process32Next( ProcessSnapshot, &ProcessEntry ) == TRUE )
+		do
 		{
 			if ( !stricmp( ProcessEntry.szExeFile, Name.data() ) )
 			{
@@ -107,6 +107,7 @@ uint32_t FindProcess( std::string Name )
 				return ProcessEntry.th32ProcessID;
 			}
 		}
+		while ( Process32Next( ProcessSnapshot, &ProcessEntry ) )
 	}
 	CloseHandle( ProcessSnapshot );
 	return 0;
