@@ -26,7 +26,7 @@ BOOL ExposeKernelMemoryToProcess( MemoryController& Mc, PVOID Memory, SIZE_T Siz
 {
 	Mc.AttachTo( EProcess );
 
-	BOOL Fail = FALSE;
+	BOOL Success = FALSE;
 
 	Mc.IterPhysRegion( Memory, Size, [ & ] ( PVOID Va, uint64_t Pa, SIZE_T Sz )
 	{
@@ -38,19 +38,18 @@ BOOL ExposeKernelMemoryToProcess( MemoryController& Mc, PVOID Memory, SIZE_T Siz
 
 		if ( !Info.Pde || ( Info.Pte && ( !Info.Pte->present ) ) )
 		{
-			Fail = TRUE;
+			Success = FALSE;
 		}
 		else
 		{
 			if ( Info.Pte )
 				Info.Pte->user = TRUE;
-			Fail = FALSE;
 		}
 	} );
 
 	Mc.Detach();
 
-	return !Fail;
+	return Success;
 }
 
 PUCHAR FindKernelPadSinglePage( PUCHAR Start, SIZE_T Size )
