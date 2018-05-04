@@ -107,7 +107,7 @@ uint32_t FindProcess( const std::string& Name )
 				return ProcessEntry.th32ProcessID;
 			}
 		}
-		while ( Process32Next( ProcessSnapshot, &ProcessEntry ) )
+		while ( Process32Next( ProcessSnapshot, &ProcessEntry ) );
 	}
 	CloseHandle( ProcessSnapshot );
 	return 0;
