@@ -90,7 +90,7 @@ static std::vector<BYTE> Mp_CreateImportShell( BYTE* Image, PVOID MappedAdr, boo
 		FileHeader->OptionalHeader.DataDirectory[ IMAGE_DIRECTORY_ENTRY_IMPORT ].VirtualAddress
 	);
 
-	while ( ImportDescriptor && ImportDescriptor->Name )
+	while ( ImportDescriptor && ImportDescriptor->Name && FileHeader->OptionalHeader.DataDirectory[ IMAGE_DIRECTORY_ENTRY_IMPORT ].Size )
 	{
 		PCHAR ModuleName = ( PCHAR ) Mp_RvaToPointer( Image, ImportDescriptor->Name );
 
@@ -127,6 +127,8 @@ static std::vector<BYTE> Mp_CreateImportShell( BYTE* Image, PVOID MappedAdr, boo
 
 		for ( ; Thunk->u1.AddressOfData; Thunk++, Func++ )
 		{
+			assert( !( Thunk->u1.Ordinal & IMAGE_ORDINAL_FLAG64 ) );
+
 			FARPROC FunctionAddress = NULL;
 			IMAGE_IMPORT_BY_NAME* ImageImportByName = ( IMAGE_IMPORT_BY_NAME* )
 				Mp_RvaToPointer( Image, *( DWORD* ) Thunk );
