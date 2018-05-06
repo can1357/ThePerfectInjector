@@ -113,6 +113,14 @@ uint32_t FindProcess( const std::string& Name )
 	return 0;
 }
 
+
+static const char* ConHdr = "=================================================\n"
+                            "|             The Perfect Injector              |\n"
+	                        "| This software is distributed free of charge.  |\n"
+	                        "| If you bought this you have been scammed.     |\n"
+	                        "| https://github.com/can1357/ThePerfectInjector |\n"
+	                        "=================================================\n\n";
+
 int main( int argc, char**argv )
 {
 	std::string ProcessName = argc > 1 ? argv[ 1 ] : "";
@@ -132,6 +140,11 @@ int main( int argc, char**argv )
 			Flags[ Str ] = true;
 		}
 	}
+
+	SetConsoleTitleA( "The Perfect Injector" );
+	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), 0xF );
+	printf( ConHdr );
+	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), 0x8 );
 
 	if ( !ProcessName.size() )
 	{
