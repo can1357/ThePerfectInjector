@@ -138,7 +138,7 @@ static std::vector<BYTE> Mp_CreateImportShell( BYTE* Image, PVOID MappedAdr, boo
 			uint32_t ImportNameOffset = DataContainer.size();
 
 			if ( !strcmpi( ImportName, "AddVectoredExceptionHandler" ) )
-				printf( "\n[+] WARNING: Vectored Exception Handling IS NOT SUPPORTING!\n\n" );
+				printf( "\n[+] WARNING: Vectored Exception Handling IS NOT SUPPORTED!\n\n" );
 
 			do
 				DataContainer.push_back( *ImportName );
