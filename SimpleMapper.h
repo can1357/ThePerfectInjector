@@ -137,6 +137,9 @@ static std::vector<BYTE> Mp_CreateImportShell( BYTE* Image, PVOID MappedAdr, boo
 
 			uint32_t ImportNameOffset = DataContainer.size();
 
+			if ( !strcmpi( ImportName, "AddVectoredExceptionHandler" ) )
+				printf( "[+] WARNING: VEH ARE NOT SUPPORTED!!!" );
+
 			do
 				DataContainer.push_back( *ImportName );
 			while ( *ImportName++ );
@@ -191,6 +194,11 @@ static void Mp_RelocateImage( BYTE* Image, BYTE* Target )
 		uint64_t VirtSize = SectionHeader[ i ].Misc.VirtualSize;
 		ZeroMemory( Target + VirtualAddress, VirtSize );
 		memcpy( Target + VirtualAddress, Image + RawData, RawSize );
+
+		if ( !strcmpi( Name, ".pdata" ) )
+			printf( "[+] WARNING: SEH ARE NOT SUPPORTED!!!" );
+		if ( !strcmpi( Name, ".tls" ) )
+			printf( "[+] WARNING: TLS IS NOT SUPPORTED!!!" );
 	}
 
 	// Reloc sections
