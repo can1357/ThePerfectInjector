@@ -230,10 +230,20 @@ static TlsLockedHookController* Mp_MapDllAndCreateHookEntry( const std::string& 
 {
 	auto File = Mp_ReadFile( Path );
 
+	assert( File.size() );
+
 	PIMAGE_DOS_HEADER DosHeader = ( PIMAGE_DOS_HEADER ) File.data();
+
+	assert( DosHeader->e_magic == IMAGE_DOS_SIGNATURE );
+
 	PIMAGE_NT_HEADERS FileHeader = ( PIMAGE_NT_HEADERS ) ( ( uint64_t ) DosHeader + DosHeader->e_lfanew );
+
+	assert( FileHeader->Signature == IMAGE_NT_SIGNATURE );
+
 	PIMAGE_OPTIONAL_HEADER OptionalHeader = &FileHeader->OptionalHeader;
 
+	assert( OptionalHeader->Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC );
+	assert( FileHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 );
 
 	std::vector<BYTE> Prologue =
 	{ 
@@ -307,6 +317,7 @@ static TlsLockedHookController* Mp_MapDllAndCreateHookEntry( const std::string& 
 		0xFF, 0xE0                                                    // jmp rax
 	};
 
+	printf( "[+] Creating import shellcode...\n" );
 	uint32_t ShellSize = Mp_CreateImportShell( File.data(), nullptr, LoadLib ).size() + JmpEntryPont.size() + Prologue.size();
 
 	BYTE* Memory = ( BYTE* ) MemoryAllocator( OptionalHeader->SizeOfImage + ShellSize + 0xFFF );
@@ -320,7 +331,11 @@ static TlsLockedHookController* Mp_MapDllAndCreateHookEntry( const std::string& 
 	Mp_PushBytes( Shell, JmpEntryPont );
 	Mp_PushBytes( Prologue, Shell );
 	Shell = Prologue;
+
+	printf( "[+] Relocating image...\n" );
 	Mp_RelocateImage( File.data(), PBYTE( ImageMemory ) );
 	memcpy( Memory, Shell.data(), Shell.size() );
+
+	printf( "[+] Image mapping done!\n" );
 	return ( TlsLockedHookController * ) Memory;
 }
