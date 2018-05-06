@@ -57,10 +57,10 @@ PUCHAR FindKernelPadSinglePage( PUCHAR Start, SIZE_T Size )
 	PUCHAR It = Start;
 
 	MEMORY_BASIC_INFORMATION Mbi;
-	
+
 	PUCHAR StreakStart = 0;
 	int Streak = 0;
-	
+
 	do
 	{
 		if ( ( 0x1000 - ( uint64_t( It ) & 0xFFF ) ) < Size )
@@ -114,7 +114,7 @@ uint32_t FindProcess( const std::string& Name )
 }
 
 int main( int argc, char**argv )
-{	
+{
 	std::string ProcessName = argc > 1 ? argv[ 1 ] : "";
 	std::string DllPath = argc > 2 ? argv[ 2 ] : "";
 
@@ -172,8 +172,8 @@ int main( int argc, char**argv )
 	// Hook a very commonly used function
 	PUCHAR _TlsGetValue = ( PUCHAR ) GetProcAddress( GetModuleHandleA( "KERNEL32" ), "TlsGetValue" ); // Not &TlsGetValue to avoid __imp intermodule calls
 
-	// kernel32._TlsGetValue - EB 1E                 - jmp kernel32._TlsGetValue+
-	// KERNEL32._TlsGetValue - E9 CBD70100           - jmp KERNEL32.UTUnRegister+160
+																									  // kernel32._TlsGetValue - EB 1E                 - jmp kernel32._TlsGetValue+
+																									  // KERNEL32._TlsGetValue - E9 CBD70100           - jmp KERNEL32.UTUnRegister+160
 	assert( *_TlsGetValue == 0xE9 || *_TlsGetValue == 0xEB );
 	PUCHAR Target = ( *_TlsGetValue == 0xEB ) ? ( _TlsGetValue + 2 + *( int8_t* ) ( _TlsGetValue + 1 ) ) : ( _TlsGetValue + 5 + *( int32_t* ) ( _TlsGetValue + 1 ) );
 
@@ -243,7 +243,7 @@ int main( int argc, char**argv )
 
 	PUCHAR PadSpace = FindKernelPadSinglePage( _TlsGetValue, PidBasedHook.size() );
 
-	if( !PadSpace )
+	if ( !PadSpace )
 		ERROR( "Couldn't Find Appropriate Padding" );
 
 	printf( "[-] Hooking TlsGetValue @                   %16llx\n", _TlsGetValue );
@@ -255,7 +255,7 @@ int main( int argc, char**argv )
 	*( int32_t* ) ( &PidBasedHook[ 0x13 ] ) = Target - ( PadSpace + 0x17 ); // Jmp
 	*( PUCHAR* ) ( &PidBasedHook[ 0x19 ] ) = &TlsHookController->EntryBytes; // Hook target
 
-	// Backup and complete hook
+																			 // Backup and complete hook
 	BYTE Jmp[ 5 ];
 	Jmp[ 0 ] = 0xE9;
 	*( int32_t* ) ( Jmp + 1 ) = PadSpace - ( _TlsGetValue + 5 );
@@ -300,7 +300,8 @@ int main( int argc, char**argv )
 	printf( "[-] Hooked! Waiting for threads to spin...\n" );
 
 	// Wait for threads to lock
-	while ( !Controller.ReadVirtual<BYTE>( &TlsHookController->NumThreadsWaiting ) && !( GetAsyncKeyState( VK_F1 ) & 0x8000 ) )
+	uint64_t TStart = GetTickCount64();
+	while ( !Controller.ReadVirtual<BYTE>( &TlsHookController->NumThreadsWaiting ) && !( GetAsyncKeyState( VK_F1 ) & 0x8000 ) && ( ( GetTickCount64() - TStart ) < 5000 ) )
 		Sleep( 1 );
 	printf( "[-] Threads spinning:                       %16llx\n", TlsHookController->NumThreadsWaiting );
 
@@ -308,13 +309,18 @@ int main( int argc, char**argv )
 
 	Controller.AttachIfCanRead( EProcess, _TlsGetValue );
 	Controller.WriteVirtual( Backup2.data(), _TlsGetValue, 5 );
-	printf( "[-] Unhooked and started thread hijacking!\n" );
+	
+	
+	if ( TlsHookController->NumThreadsWaiting )
+		printf( "[-] Unhooked and started thread hijacking!\n" );
+	else
+		printf( "[-] ERROR: Wait timed out...\n" );
+
 	TlsHookController->IsFree = TRUE;
 	Sleep( 2000 );
 
 	Controller.AttachIfCanRead( EProcess, PadSpace );
 	Controller.WriteVirtual( Backup1.data(), PadSpace, PidBasedHook.size() );
 
-	system( "pause" );
-	return 0;
+	return system( "pause" );
 }
