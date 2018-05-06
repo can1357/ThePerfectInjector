@@ -138,7 +138,7 @@ static std::vector<BYTE> Mp_CreateImportShell( BYTE* Image, PVOID MappedAdr, boo
 			uint32_t ImportNameOffset = DataContainer.size();
 
 			if ( !strcmpi( ImportName, "AddVectoredExceptionHandler" ) )
-				printf( "[+] WARNING: VEH ARE NOT SUPPORTED!!!" );
+				printf( "[+] WARNING: Vectored Exception Handling IS NOT SUPPORTING!\n" );
 
 			do
 				DataContainer.push_back( *ImportName );
@@ -196,9 +196,9 @@ static void Mp_RelocateImage( BYTE* Image, BYTE* Target )
 		memcpy( Target + VirtualAddress, Image + RawData, RawSize );
 
 		if ( !strcmpi( Name, ".pdata" ) )
-			printf( "[+] WARNING: SEH ARE NOT SUPPORTED!!!" );
+			printf( "[+] WARNING: Structured Exception Handling IS NOT SUPPORTED!\n" );
 		if ( !strcmpi( Name, ".tls" ) )
-			printf( "[+] WARNING: TLS IS NOT SUPPORTED!!!" );
+			printf( "[+] WARNING: Thread-local Storage IS NOT SUPPORTED!\n" );
 	}
 
 	// Reloc sections
