@@ -240,7 +240,7 @@ int main( int argc, char**argv )
 	// Expose region to process
 	for ( auto Region : UsedRegions )
 	{
-		printf( "[-] Exposing %16llx (%08x bytes) to pid:%6llx\n", Region.first, Region.second, Pid );
+		printf( "[-] Exposing %16llx (%08x bytes) to pid:%16llx\n", Region.first, Region.second, Pid );
 		ExposeKernelMemoryToProcess( Controller, Region.first, Region.second, EProcess );
 	}
 
