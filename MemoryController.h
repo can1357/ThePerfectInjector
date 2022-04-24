@@ -433,13 +433,13 @@ static MemoryController Mc_InitContext( CapcomContext** CpCtxReuse = 0, KernelCo
 				uint64_t Pid = k_PsGetProcessId( Controller.CurrentEProcess );
 
 				uint32_t PidOffset = *( uint32_t* ) ( ( PUCHAR ) k_PsGetProcessId + 3 );
-				if ( PidOffset < 0x400 && *( uint64_t* ) ( Controller.CurrentEProcess + PidOffset ) == Pid )
+				if ( PidOffset < 0x600 && *( uint64_t* ) ( Controller.CurrentEProcess + PidOffset ) == Pid )
 				{
 					Controller.UniqueProcessIdOffset = PidOffset;
 					Controller.ActiveProcessLinksOffset = Controller.UniqueProcessIdOffset + 0x8;
 				}
 
-				for ( int i = 0; i < 0x400; i += 0x8 )
+				for ( int i = 0; i < 0x600; i += 0x8 )
 				{
 					uint64_t* Ptr = (uint64_t*)(Controller.CurrentEProcess + i);
 					if ( !Controller.UniqueProcessIdOffset && Ptr[ 0 ] & 0xFFFFFFFF == Pid && ( Ptr[ 1 ] > 0xffff800000000000 ) && ( Ptr[ 2 ] > 0xffff800000000000 ) && ( ( Ptr[ 1 ] & 0xF ) == ( Ptr[ 2 ] & 0xF ) ) )

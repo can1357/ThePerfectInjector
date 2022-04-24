@@ -87,7 +87,7 @@ static std::wstring Cl_GetDriverPath()
 
 static NTSTATUS Cl_RemoveSimilarDrivers( BYTE* Driver )
 {
-	namespace fs = std::experimental::filesystem;
+	namespace fs = std::filesystem;
 
 	std::wstring DriverPath = Cl_GetDriverPath();
 
